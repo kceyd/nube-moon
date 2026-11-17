@@ -1,0 +1,56 @@
+# moonsoon: MySQL + ms-usuarios (8082) + ms-productos (8081)
+# Las variables se leen del archivo .env que está junto a este archivo.
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: moonsoon-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS:?Define DB_PASS en el archivo .env}
+    # Ajustes para que MySQL use poca RAM en una instancia pequeña
+    command: --performance-schema=OFF --innodb-buffer-pool-size=64M --max-connections=50
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    # No se publica el puerto 3306: solo los microservicios (red interna) lo usan.
+
+  ms-usuarios:
+    build: ./backend/ms-usuarios
+    container_name: ms-usuarios
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      DB_URL: "jdbc:mysql://mysql:3306/moonsoon_usuarios?createDatabaseIfNotExist=true&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false"
+      DB_USER: root
+      DB_PASS: ${DB_PASS}
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET (32+ caracteres) en el archivo .env}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin123!}
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  ms-productos:
+    build: ./backend/ms-productos
+    container_name: ms-productos
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      DB_URL: "jdbc:mysql://mysql:3306/moonsoon_productos?createDatabaseIfNotExist=true&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false"
+      DB_USER: root
+      DB_PASS: ${DB_PASS}
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET (32+ caracteres) en el archivo .env}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
