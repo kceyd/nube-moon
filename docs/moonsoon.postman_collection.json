@@ -95,6 +95,51 @@
           ]
         },
         {
+          "name": "Renovar token CLIENTE (refresh)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenCliente}}"
+              }
+            ],
+            "url": "{{usuariosUrl}}/api/auth/refresh"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Entrega un token nuevo\", function () { pm.expect(pm.response.json().token).to.be.a('string').and.not.empty; });",
+                  "pm.collectionVariables.set(\"tokenCliente\", pm.response.json().token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Renovar token sin token (401)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{usuariosUrl}}/api/auth/refresh"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código 401\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Login con clave incorrecta (401)",
           "request": {
             "method": "POST",

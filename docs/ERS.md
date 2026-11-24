@@ -77,6 +77,7 @@ Script completo en `docs/moonsoon.sql`.
 | Servicio | Método y ruta | Acceso |
 |---|---|---|
 | ms-usuarios | POST `/api/auth/login`, POST `/api/auth/registro` | Público |
+| ms-usuarios | POST `/api/auth/refresh` (renueva el JWT) | Token vigente |
 | ms-usuarios | GET/POST `/api/usuarios`; GET/PUT/DELETE `/api/usuarios/{id}`; PATCH `/api/usuarios/{id}/rol`, `/estado` | ADMIN |
 | ms-productos | GET `/api/productos`, GET `/api/productos/{id}` | Público |
 | ms-productos | POST `/api/productos`; PUT/DELETE `/api/productos/{id}` | ADMIN |

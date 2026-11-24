@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext.jsx';
 import { formatearCLP } from '../utils/format.js';
 
@@ -28,7 +29,7 @@ export default function ProductCard({ producto }) {
         )}
       </div>
       <div className="tarjeta-producto__contenido">
-        <h3>{producto.nombre}</h3>
+        <h3><Link to={`/productos/${producto.id}`}>{producto.nombre}</Link></h3>
         <p className="tarjeta-producto__precio">{formatearCLP(producto.precio)}</p>
         <button type="button" className="boton boton-primario" onClick={manejarClick} disabled={sinStock}>
           {sinStock ? 'Sin stock' : agregado ? 'Agregado ✓' : 'Agregar al carrito'}

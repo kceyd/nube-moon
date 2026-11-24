@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { authService } from '../services/authService';
-import { setToken } from '../services/http';
+import { getToken, setToken } from '../services/http';
+import { expiracionToken, msHastaRenovar } from '../utils/jwt';
 
 const USER_KEY = 'moonsoon_usuario';
 const AuthContext = createContext(null);
@@ -36,6 +37,29 @@ export function AuthProvider({ children }) {
     window.addEventListener('moonsoon:unauthorized', logout);
     return () => window.removeEventListener('moonsoon:unauthorized', logout);
   }, [logout]);
+
+  // Renovación del token: 5 minutos antes de que venza se pide uno nuevo a /api/auth/refresh.
+  // Si al recargar la página el token guardado ya venció, la sesión se cierra de inmediato.
+  useEffect(() => {
+    if (!usuario) return undefined;
+    const exp = expiracionToken(getToken());
+    if (exp === null) return undefined; // sin token legible: lo resuelve el 401 del backend
+    if (exp <= Date.now()) {
+      logout();
+      return undefined;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const { token, usuario: u } = await authService.refresh();
+        setToken(token);
+        localStorage.setItem(USER_KEY, JSON.stringify(u));
+        setUsuario(u);
+      } catch {
+        logout();
+      }
+    }, msHastaRenovar(exp));
+    return () => clearTimeout(timer);
+  }, [usuario, logout]);
 
   const value = useMemo(
     () => ({ usuario, esAdmin: usuario?.rol === 'ADMIN', login, logout, registrar }),

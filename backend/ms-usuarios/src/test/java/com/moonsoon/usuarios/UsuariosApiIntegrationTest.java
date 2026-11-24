@@ -153,6 +153,22 @@ class UsuariosApiIntegrationTest {
     }
 
     @Test
+    void refreshConTokenVigenteEntregaTokenNuevo() throws Exception {
+        mvc.perform(post("/api/auth/refresh").header("Authorization", tokenCliente()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.usuario.rol").value("CLIENTE"))
+                .andExpect(jsonPath("$.usuario.password").doesNotExist());
+    }
+
+    @Test
+    void refreshSinTokenOConTokenInvalidoDa401() throws Exception {
+        mvc.perform(post("/api/auth/refresh")).andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/auth/refresh").header("Authorization", "Bearer basura"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void swaggerYDocumentacionSonPublicos() throws Exception {
         mvc.perform(get("/v3/api-docs")).andExpect(status().isOk());
     }

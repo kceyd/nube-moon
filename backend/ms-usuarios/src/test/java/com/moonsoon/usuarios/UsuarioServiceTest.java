@@ -209,4 +209,27 @@ class UsuarioServiceTest {
         assertEquals(2, service.listar().size());
         assertEquals("b@x.cl", service.obtener(2L).email());
     }
+
+    @Test
+    void renovarEntregaTokenNuevoConElRolActual() {
+        Usuario u = user(3L, "c@x.cl", Rol.CLIENTE, true);
+        when(repo.findByEmailIgnoreCase("c@x.cl")).thenReturn(Optional.of(u));
+        when(jwt.generar(u)).thenReturn("nuevo");
+        AuthResponse r = service.renovar("c@x.cl");
+        assertEquals("nuevo", r.token());
+        assertEquals(Rol.CLIENTE, r.usuario().rol());
+    }
+
+    @Test
+    void renovarRechazaUsuarioDesactivadoConEstado403() {
+        when(repo.findByEmailIgnoreCase("c@x.cl")).thenReturn(Optional.of(user(3L, "c@x.cl", Rol.CLIENTE, false)));
+        assertEquals(HttpStatus.FORBIDDEN, estadoDe(() -> service.renovar("c@x.cl")));
+        verify(jwt, never()).generar(any());
+    }
+
+    @Test
+    void renovarRechazaUsuarioInexistenteConEstado401() {
+        when(repo.findByEmailIgnoreCase(anyString())).thenReturn(Optional.empty());
+        assertEquals(HttpStatus.UNAUTHORIZED, estadoDe(() -> service.renovar("borrado@x.cl")));
+    }
 }

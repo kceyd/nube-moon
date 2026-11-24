@@ -28,8 +28,25 @@ npm run test:coverage    # cobertura
 npm run build            # build de producción
 ```
 
+## URLs públicas (AWS)
+| Recurso | URL |
+|---|---|
+| Frontend (S3) | http://nube-monnnn-498605208964-us-east-1-an.s3-website-us-east-1.amazonaws.com |
+| API productos | http://18.233.56.97:8081/api/productos |
+| Swagger usuarios | http://18.233.56.97:8082/swagger-ui/index.html |
+| Swagger productos | http://18.233.56.97:8081/swagger-ui/index.html |
+
+Para que el frontend en S3 pueda llamar a la API:
+- En el `.env` de la EC2, `CORS_ORIGINS` debe incluir la URL de S3 (sin `/` final) y luego `docker compose up -d`.
+- En S3 → Static website hosting, **Error document = `index.html`**: así, recargar `/login`, `/admin` o `/productos/3` no da 404.
+
 ## Rutas
-`/` Home · `/productos` · `/login` · `/registro` · `/carrito` (requiere sesión) · `/admin` (solo ADMIN)
+`/` Home · `/productos` · `/productos/:id` (detalle) · `/login` · `/registro` · `/carrito` (requiere sesión) · `/admin` (solo ADMIN)
+
+## Sesión y renovación del token (JWT)
+- Login → `POST /api/auth/login` entrega un JWT de 24 h (correo, id y rol).
+- **Renovación:** 5 minutos antes de vencer, el frontend llama a `POST /api/auth/refresh` con el token vigente y recibe uno nuevo. El backend vuelve a leer el usuario: si fue desactivado responde 403 y el frontend cierra la sesión.
+- Al recargar la página con un token ya vencido, la sesión se cierra de inmediato.
 
 ## Usuario administrador de prueba
 Lo crea ms-usuarios al arrancar (`DataInitializer`):

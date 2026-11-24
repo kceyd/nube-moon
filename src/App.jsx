@@ -4,6 +4,7 @@ import Footer from './components/Footer.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Home from './pages/Home.jsx';
 import Productos from './pages/Productos.jsx';
+import ProductoDetalle from './pages/ProductoDetalle.jsx';
 import Login from './pages/Login.jsx';
 import Registro from './pages/Registro.jsx';
 import Carrito from './pages/Carrito.jsx';
@@ -17,6 +18,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/productos" element={<Productos />} />
+          <Route path="/productos/:id" element={<ProductoDetalle />} />
           <Route path="/login" element={<Login />} />
           <Route path="/registro" element={<Registro />} />
           <Route

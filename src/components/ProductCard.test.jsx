@@ -1,13 +1,16 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ProductCard from './ProductCard.jsx';
+import { MemoryRouter } from 'react-router-dom';
 import { CartProvider } from '../context/CartContext.jsx';
 
 function renderCard(producto) {
   return render(
-    <CartProvider>
-      <ProductCard producto={producto} />
-    </CartProvider>
+    <MemoryRouter>
+      <CartProvider>
+        <ProductCard producto={producto} />
+      </CartProvider>
+    </MemoryRouter>
   );
 }
 

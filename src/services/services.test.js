@@ -26,6 +26,11 @@ describe('servicios de la API', () => {
       { method: 'POST', body: { nombre: 'Ana', email: 'a@a.cl', password: 'clave123' } });
   });
 
+  it('authService.refresh hace POST a /api/auth/refresh sin cuerpo', async () => {
+    await authService.refresh();
+    expect(request).toHaveBeenCalledWith('http://usuarios', '/api/auth/refresh', { method: 'POST' });
+  });
+
   it('usuariosService cubre el CRUD completo', async () => {
     await usuariosService.listar();
     await usuariosService.obtener(3);

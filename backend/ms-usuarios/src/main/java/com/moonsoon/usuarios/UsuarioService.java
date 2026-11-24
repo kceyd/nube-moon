@@ -29,6 +29,18 @@ public class UsuarioService {
         return new AuthResponse(jwt.generar(u), UsuarioResponse.de(u));
     }
 
+    /**
+     * Renueva el token de un usuario que ya tiene un token válido (aún no vencido).
+     * Se vuelve a leer el usuario desde la BD: si fue desactivado o cambió de rol,
+     * el token nuevo refleja ese cambio (o se rechaza).
+     */
+    public AuthResponse renovar(String email) {
+        Usuario u = repo.findByEmailIgnoreCase(email == null ? "" : email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sesión inválida"));
+        if (!u.isActivo()) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Usuario desactivado");
+        return new AuthResponse(jwt.generar(u), UsuarioResponse.de(u));
+    }
+
     public UsuarioResponse registrar(RegistroRequest r) {
         validarEmailLibre(r.email(), null);
         Usuario u = new Usuario();
